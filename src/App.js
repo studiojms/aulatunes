@@ -1,7 +1,13 @@
+import Header from './components/Header/Header';
+
 import './assets/styles.scss';
 
 function App() {
-  return <div>AulaTunes</div>;
+  return (
+    <>
+      <Header />
+    </>
+  );
 }
 
 export default App;
