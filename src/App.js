@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import AlbumList from './components/albumList/AlbumList';
 import Header from './components/Header/Header';
@@ -14,16 +14,41 @@ function App() {
   const [data, setData] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [sort, setSort] = useState(constants.sort.ALBUM);
+  const [favorites, setFavorites] = useState([]);
 
-  const listTopAlbums = async () => {
+  const processData = useCallback((list) => {
+    const data = list?.feed?.entry.map(AlbumUtils.prepareAlbumData) || [];
+    data.forEach((album) => {
+      album.favorite = favorites?.includes(album.id);
+    });
+    setData(data);
+  }, [favorites]);
+
+  const listTopAlbums = useCallback(async () => {
     const list = await AlbumService.listTopAlbums();
-    setData(list?.feed?.entry.map(AlbumUtils.prepareAlbumData) || []);
+    processData(list);
+  }, [processData]);
+
+  const listTopSongs = useCallback(async () => {
+    const list = await AlbumService.listTopSongs();
+    processData(list);
+  }, [processData]);
+
+  const toggleFavorite = (id) => {
+    AlbumService.setFavorite(id);
+
+    let data = [...favorites, id];
+
+    if (favorites.includes(id)) {
+      data = favorites.filter((fav) => fav !== id);
+    }
+
+    setFavorites(data);
   };
 
-  const listTopSongs = async () => {
-    const list = await AlbumService.listTopSongs();
-    setData(list?.feed?.entry.map(AlbumUtils.prepareAlbumData) || []);
-  };
+  useEffect(() => {
+    setFavorites(AlbumService.getFavorites());
+  }, [data]);
 
   useEffect(() => {
     try {
@@ -43,7 +68,8 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [sort]);
+  }, [sort, listTopAlbums, listTopSongs]);
+
 
   return (
     <>
@@ -54,7 +80,7 @@ function App() {
         onChangeText={(e) => setSearchText(e.target.value)}
         onChangeSort={(e) => setSort(e.target.value)}
       />
-      <AlbumList data={data} search={searchText} loading={loading} />
+      <AlbumList data={data} search={searchText} loading={loading} toggleFavorite={toggleFavorite} />
     </>
   );
 }

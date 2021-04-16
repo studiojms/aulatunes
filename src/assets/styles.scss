@@ -20,6 +20,13 @@ ol {
   }
 }
 
+.at-header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  column-gap: 10px;
+}
+
 .at-header {
   text-align: center;
   margin-top: 10px;
@@ -136,6 +143,10 @@ ol {
 
 .at-image {
   width: 100%;
+
+  &.favorite {
+    border: 2px solid #f3a018;
+  }
 }
 
 .at-img {

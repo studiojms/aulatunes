@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Album from './Album';
 
 describe('<Album />', () => {
@@ -26,5 +26,31 @@ describe('<Album />', () => {
     const albumImage = screen.getByRole('img');
     expect(albumImage.src).toContain(img);
     expect(albumImage.alt).toBe(title);
+  });
+
+  it('should show favorite icon on album', () => {
+    render(<Album title="Album" />);
+
+    const favoriteIcon = screen.getByRole('presentation');
+    expect(favoriteIcon).toBeInTheDocument();
+  });
+
+  it('should add favorite class when favorite prop is true', () => {
+    render(<Album title="Album" favorite />);
+
+    const albumImage = screen.getByRole('img');
+    expect(albumImage.className).toContain('favorite');
+  });
+
+  it('should call the function to toggle favorite when clicking on the Album', () => {
+    const toggleFn = jest.fn();
+
+    render(<Album image="logo.jpg" toggleFavorite={toggleFn} />);
+
+    const albumComponent = screen.getByRole('listitem');
+
+    fireEvent.click(albumComponent);
+
+    expect(toggleFn).toHaveBeenCalledTimes(1);
   });
 });
